@@ -12,13 +12,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Define only the environments you want to build here
-        environment: [SBC_NodeMCU32S, a1sMini,AiO-DAC] 
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Cache PlatformIO
         uses: actions/cache@v4
@@ -42,6 +40,5 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
-      - name: Build Specific Environments
-        # This uses the environment defined in the matrix above
-        run: pio run -e ${{ matrix.environment }}
+      - name: Build NodeMCU firmware
+        run: pio run -e SBC_NodeMCU32S
