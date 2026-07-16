@@ -67,6 +67,21 @@ Respect where is due to the underlying libraries needed for this to work :
 - [ESP32-A2DP library](https://github.com/pschatzmann/ESP32-A2DP)
 - [Arduino Audio Driver](https://github.com/pschatzmann/arduino-audio-driver)
 
+## Building the firmware
+
+Clone the repository with its `espod` submodule, then build the supported
+NodeMCU-32S/ESP32-WROOM firmware:
+
+```sh
+git submodule update --init --recursive
+pio run -e SBC_NodeMCU32S
+```
+
+The pinned `espod` submodule includes the ESPDrive database-handler callbacks.
+GitHub Actions runs the same build. Historical AudioKit and AiO-DAC
+environments are retained in `platformio.archived.ini` but are not part of the
+supported build.
+
 ## How to use it, and some tips
 
 Although it should be pretty straightforward at this stage, to use this, you need to connect the USB with the modified VID/PID to the USB receptacle of the car, and the audio jack to the AUX input (with a male-male stereo cable, for example).
