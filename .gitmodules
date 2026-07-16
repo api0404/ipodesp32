@@ -1,0 +1,3 @@
+[submodule "lib/espod"]
+	path = lib/espod
+	url = https://github.com/martinroger/espod.git
