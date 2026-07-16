@@ -4,8 +4,8 @@
 .vscode/launch.json
 .vscode/ipch
 /serialLogs
-Support Docs/iPod Accessory Protocol Interface Specification _ R38 Manualzz.pdf
+docs/reference/iPod Accessory Protocol Interface Specification _ R38 Manualzz.pdf
 *.bkp
 .DS_Store
-/pcbs/*/*-backups
-/pcbs/AiO-i2s-DAC/production/backups
+/hardware/pcbs/*/*-backups
+/hardware/pcbs/AiO-i2s-DAC/production/backups

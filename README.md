@@ -2,7 +2,15 @@
 
 # iPodESP32 : an iPod emulator for 2nd gen Minis
 
-![AiO DAC board prototype](/img/AiODAC.jpg)
+![AiO DAC board prototype](assets/images/AiODAC.jpg)
+
+## Repository layout
+
+- `src/`, `include/`, and `lib/` — primary PlatformIO firmware and its `espod` submodule.
+- `hardware/` — custom PlatformIO boards, PCB projects, and CP2102N configuration files.
+- `assets/images/` — images used by project documentation.
+- `docs/reference/` — reference schematics, specifications, and diagrams.
+- `tools/isnoop/` — standalone PlatformIO utility for inspecting iPod serial traffic.
 
 ## CAVEAT
 > [!WARNING]
