@@ -94,3 +94,32 @@ If it still doesn't come up, in some occasions it is necessary to disconnect the
 The Mini will try to automatically start playback once the iPod option is selected. Depending on your phone configuration, it may automatically open your favourite music player and start playing. In some cases it might be necessary to manually open a music player for things to get started. At this stage the display should update with the track info.
 
 When you leave the car, the USB gets shut down after about 2 minutes (no risks of draining the battery) and normally the Mini negotiates a playback pause as the ignition is turned off... 
+
+## ESPDrive menu
+
+The virtual `ESPDrive` playlist is also the on-car settings and diagnostics
+surface. Existing records remain stable; newer firmware appends actions for
+car-link recovery, per-phone management, local audio processing, and live
+diagnostics.
+
+- **Reconnect car** resets only the iPod/car link. On builds with active DCD it
+  briefly releases DCD before allowing a fresh head-unit handshake; Bluetooth
+  audio is not restarted.
+- **Autoplay** cycles through Off, Head unit, Immediate, and Reliable. Reliable
+  uses a small, bounded retry sequence and stops as soon as audio starts.
+- **Phone management** can forget just the connected phone (second selection
+  required), store it as preferred, and show the stored Bluetooth address.
+  Automatic reconnect is bounded and accepts the preferred address when one is
+  configured.
+- **Audio settings** are local to the ESP32: Normal/Swap L-R/Mono output,
+  100/85/70% gain, startup fade, and immediate versus after-car-link output.
+  They do not alter the phone's AVRCP volume.
+- **Diagnostics** show live phone, bond, A2DP/AVRCP/audio, RSSI, format,
+  iPod-link, uptime, heap, reset, and firmware information. Select an entry
+  for a temporary details overlay.
+
+All settings use the `espdrive` Preferences namespace. Metadata overlays are
+temporary: AVRCP updates received while an overlay is displayed are retained
+and published when it expires. The extended-interface metadata bridge also
+publishes AVRCP genre, track number, and total track-count data when the phone
+provides it.
