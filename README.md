@@ -82,6 +82,10 @@ GitHub Actions runs the same build. Historical AudioKit and AiO-DAC
 environments are retained in `platformio.archived.ini` but are not part of the
 supported build.
 
+The supported NodeMCU-32S build enables active PL2303TA DCD control on GPIO5.
+Define `DISABLE_ACTIVE_DCD` to build without DCD access; this overrides the
+environment's default `ENABLE_ACTIVE_DCD` flag.
+
 ## How to use it, and some tips
 
 Although it should be pretty straightforward at this stage, to use this, you need to connect the USB with the modified VID/PID to the USB receptacle of the car, and the audio jack to the AUX input (with a male-male stereo cable, for example).

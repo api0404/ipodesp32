@@ -22,7 +22,12 @@
 #undef INVERT_DCD_LOGIC
 #define INVERT_DCD_LOGIC(stateBoolean) !stateBoolean
 #endif
-#if defined(ENABLE_ACTIVE_DCD) && !defined(DCD_CTRL_PIN)
+#if defined(ENABLE_ACTIVE_DCD) && !defined(DISABLE_ACTIVE_DCD)
+#define ESPDRIVE_ACTIVE_DCD 1
+#else
+#define ESPDRIVE_ACTIVE_DCD 0
+#endif
+#if ESPDRIVE_ACTIVE_DCD && !defined(DCD_CTRL_PIN)
 #define DCD_CTRL_PIN 5
 #endif
 
@@ -245,6 +250,14 @@ static void updateOutputActivation(uint32_t now)
 {
 	if (audioSettings.activation == OutputActivation::Immediate || espod.extendedInterfaceModeActive || elapsed(now, outputCarLinkDeadlineMs))
 		audioSettings.outputEnabled = true;
+}
+
+static void setEspodDisabled(bool disabled)
+{
+	espod.disabled = disabled;
+#if ESPDRIVE_ACTIVE_DCD
+	digitalWrite(DCD_CTRL_PIN, INVERT_DCD_LOGIC(disabled));
+#endif
 }
 
 static size_t writeI2sPcm(const uint8_t *data, size_t length) { return i2s.write(data, length); }
@@ -593,9 +606,8 @@ static void runCarRecovery()
 	if (carRecovery.state != CarRecoveryState::Idle) { showEspDriveOverlay("Car recovery already running", "ESPDrive", "Please wait"); return; }
 	ESP_LOGI("CarRecovery", "Starting car-link recovery");
 	espod.resetState();
-#ifdef ENABLE_ACTIVE_DCD
-	espod.disabled = true;
-	digitalWrite(DCD_CTRL_PIN, INVERT_DCD_LOGIC(true));
+#if ESPDRIVE_ACTIVE_DCD
+	setEspodDisabled(true);
 	carRecovery.state = CarRecoveryState::DcdReleased;
 	carRecovery.deadlineMs = millis() + kCarRecoveryDcdMs;
 	showEspDriveOverlay("Reconnecting car", "DCD released", "Bluetooth stays connected");
@@ -609,7 +621,7 @@ static void startPairing()
 {
 	const uint32_t now = millis();
 	keepCarLinkUntilMs = now + kPairingTimeoutMs;
-	espod.disabled = false;
+	setEspodDisabled(false);
 	a2dp_sink.set_auto_reconnect(false);
 	if (a2dp_sink.get_connection_state() == ESP_A2D_CONNECTION_STATE_CONNECTED) a2dp_sink.disconnect();
 	esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
@@ -866,7 +878,7 @@ static void serviceBluetoothEvents(uint32_t now)
 	{
 		if (pending.connected)
 		{
-			espod.disabled = false;
+			setEspodDisabled(false);
 			audioSettings.fadeStartedAtMs = now;
 			outputCarLinkDeadlineMs = now + kOutputCarLinkTimeoutMs;
 			audioSettings.outputEnabled = audioSettings.activation == OutputActivation::Immediate;
@@ -880,14 +892,11 @@ static void serviceBluetoothEvents(uint32_t now)
 		{
 			autoplay.waitingForAudio = false;
 			espod.resetState();
-			espod.disabled = !elapsed(now, keepCarLinkUntilMs);
+			setEspodDisabled(!elapsed(now, keepCarLinkUntilMs));
 		}
 
 #ifdef LED_BUILTIN
 		digitalWrite(LED_BUILTIN, INVERT_LED_LOGIC(pending.connected));
-#endif
-#ifdef ENABLE_ACTIVE_DCD
-		digitalWrite(DCD_CTRL_PIN, INVERT_DCD_LOGIC(espod.disabled));
 #endif
 	}
 
@@ -930,18 +939,17 @@ static void serviceConnectionTimers(uint32_t now)
 	if (elapsed(now, keepCarLinkUntilMs))
 	{
 		keepCarLinkUntilMs = 0;
-		if (a2dp_sink.get_connection_state() != ESP_A2D_CONNECTION_STATE_CONNECTED) espod.disabled = true;
+		if (a2dp_sink.get_connection_state() != ESP_A2D_CONNECTION_STATE_CONNECTED) setEspodDisabled(true);
 	}
 }
 
 static void serviceCarRecovery(uint32_t now)
 {
-#ifdef ENABLE_ACTIVE_DCD
+#if ESPDRIVE_ACTIVE_DCD
 	if (carRecovery.state == CarRecoveryState::DcdReleased && elapsed(now, carRecovery.deadlineMs))
 	{
 		espod.resetState();
-		espod.disabled = false;
-		digitalWrite(DCD_CTRL_PIN, INVERT_DCD_LOGIC(false));
+		setEspodDisabled(false);
 		carRecovery.state = CarRecoveryState::WaitingHandshake;
 		carRecovery.deadlineMs = now + kCarRecoveryResultMs;
 		ESP_LOGI("CarRecovery", "DCD reasserted; waiting for handshake");
@@ -995,7 +1003,7 @@ void setup()
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, INVERT_LED_LOGIC(LOW));
 #endif
-#ifdef ENABLE_ACTIVE_DCD
+#if ESPDRIVE_ACTIVE_DCD
 	pinMode(DCD_CTRL_PIN, OUTPUT);
 	digitalWrite(DCD_CTRL_PIN, INVERT_DCD_LOGIC(HIGH));
 #endif

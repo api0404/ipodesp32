@@ -138,6 +138,13 @@ DCD_N is only a one-bit status signal. It does not carry:
 
 All regular protocol data is carried through the UART TXD and RXD lines.
 
+### Firmware Default and Opt-Out
+
+The supported `SBC_NodeMCU32S` firmware enables active DCD control by default
+and drives DCD_N from GPIO5. For hardware without a safe DCD_N connection,
+define `DISABLE_ACTIVE_DCD`; it takes precedence over `ENABLE_ACTIVE_DCD` and
+compiles out all GPIO5 DCD handling and DCD-pulse recovery.
+
 ## UDA1334A Wiring
 
 | UDA1334A signal | ESP32 connection | Purpose |
