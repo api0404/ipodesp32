@@ -97,10 +97,13 @@ When you leave the car, the USB gets shut down after about 2 minutes (no risks o
 
 ## ESPDrive menu
 
-The virtual `ESPDrive` playlist is also the on-car settings and diagnostics
-surface. Existing records remain stable; newer firmware appends actions for
-car-link recovery, per-phone management, local audio processing, and live
-diagnostics.
+The virtual `ESPDrive` database is also the on-car settings and diagnostics
+surface. With `ESPDRIVE_CATEGORIZED_MENU` enabled (the default), its playlist
+level exposes Phone, Audio, Playback, Diagnostics, and System categories. The
+selected category then exposes its records through the normal iPod track
+database level. This avoids replacing playlist contents while the radio is
+browsing. Define `ESPDRIVE_CATEGORIZED_MENU=0` to restore the temporary flat
+playlist fallback for radio-protocol diagnosis.
 
 - **Reconnect car** resets only the iPod/car link. On builds with active DCD it
   briefly releases DCD before allowing a fresh head-unit handshake; Bluetooth
