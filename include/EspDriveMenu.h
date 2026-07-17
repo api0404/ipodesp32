@@ -3,6 +3,20 @@
 #include <Arduino.h>
 #include "esPod_utils.h"
 
+#ifndef ESPDRIVE_CATEGORIZED_MENU
+#define ESPDRIVE_CATEGORIZED_MENU 1
+#endif
+
+enum class EspDriveMenuCategory : uint8_t
+{
+    None,
+    Phone,
+    Audio,
+    Playback,
+    Diagnostics,
+    System
+};
+
 enum class EspDriveActionId : uint8_t
 {
     None,
@@ -53,11 +67,22 @@ struct EspDriveMenuRecord
     const char *label;
 };
 
+struct EspDriveMenuSelection
+{
+    EspDriveMenuCategory category = EspDriveMenuCategory::None;
+    DB_CATEGORY databaseCategory = DB_CAT_PLAYLIST;
+    uint32_t recordId = 0;
+    EspDriveActionId action = EspDriveActionId::None;
+};
+
 class EspDriveMenu
 {
 public:
-    static uint32_t recordCount(DB_CATEGORY category);
-    static bool recordName(DB_CATEGORY category, uint32_t recordId, const EspDriveMenuRuntime &runtime,
+    static uint32_t recordCount(DB_CATEGORY databaseCategory, EspDriveMenuCategory selectedCategory);
+    static bool recordName(DB_CATEGORY databaseCategory, EspDriveMenuCategory selectedCategory, uint32_t recordId,
+                           const EspDriveMenuRuntime &runtime,
                            char *name, size_t nameSize);
-    static EspDriveActionId actionForRecord(DB_CATEGORY category, uint32_t recordId);
+    static EspDriveMenuCategory categoryForPlaylist(uint32_t recordId);
+    static EspDriveMenuSelection selectionForRecord(DB_CATEGORY databaseCategory,
+                                                    EspDriveMenuCategory selectedCategory, uint32_t recordId);
 };
